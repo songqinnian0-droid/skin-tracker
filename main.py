@@ -23,7 +23,7 @@ CRAWLERS = [
 ]
 
 PORT = 8765
-WEB_DIR = Path(__file__).parent / "web"
+WEB_DIR = Path(__file__).parent
 
 
 def run_once():

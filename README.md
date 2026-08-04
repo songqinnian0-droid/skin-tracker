@@ -63,9 +63,8 @@ skin-tracker/
 │   ├── apex.py
 │   ├── pubg.py
 │   └── r6.py
-├── web/
-│   ├── index.html       # 展示页面（游戏风视觉）
-│   └── data.json        # 前端数据（自动生成）
+├── index.html           # 展示页面（游戏风视觉）
+├── data.json            # 前端数据（爬虫自动生成）
 ├── db.py                # SQLite 数据存取 + diff 逻辑
 ├── main.py              # 入口：爬取 + 导出 + 启动网页服务
 ├── export_json.py       # 数据库 → JSON

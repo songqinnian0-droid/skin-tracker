@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 import db
 
-OUT_PATH = Path(__file__).parent / "web" / "data.json"
+OUT_PATH = Path(__file__).parent / "data.json"
 
 
 def export():
