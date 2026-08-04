@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>SKIN.TRACKER // 射击游戏皮肤情报站</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #05070c;
+    --bg-1: #0a0e18;
+    --bg-2: #0f1524;
+    --line: #1b2440;
+    --neon: #ff2e63;       /* 主强调 - 洋红 */
+    --neon-2: #00e5ff;     /* 副强调 - 青色 */
+    --gold: #ffb300;       /* 稀有品质 */
+    --text: #e8ecf5;
+    --text-2: #7a86a8;
+    --text-3: #4d5677;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--bg-0);
+    color: var(--text);
+    font-family: "Rajdhani", -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: .01em;
+  }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .heading { font-family: "Rajdhani", sans-serif; font-weight: 700; letter-spacing: .04em; }
+
+  /* 背景：静态渐变 + 网格（网格改用 background-attachment: local 让它跟随滚动，不再是 fixed 全屏重绘） */
+  body {
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(255,46,99,.10), transparent 55%),
+      radial-gradient(900px 500px at 85% 5%, rgba(0,229,255,.08), transparent 55%),
+      linear-gradient(180deg, #05070c 0%, #060812 100%);
+    min-height: 100vh;
+    position: relative;
+  }
+  /* 网格改成主容器的背景（跟着滚动），不再全屏 fixed */
+  .max-w-\[1400px\] {
+    background-image:
+      linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  /* 扫描线只保留在 topbar/hero 局部，且用 CSS 而非全屏叠加 */
+  main, .topbar, .drawer, .lightbox, footer, .hero { position: relative; z-index: 2; }
+
+  /* ============ 锐角切割（clip-path 斜切）============ */
+  .clip-cut {
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  }
+  .clip-cut-sm {
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+  .clip-tag {
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  /* ============ 顶栏 ============ */
+  .topbar {
+    position: sticky; top: 0;
+    background: rgba(5,7,12,.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 40;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; letter-spacing: .08em;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--neon), var(--neon-2));
+    clip-path: polygon(50% 0, 100% 35%, 82% 100%, 18% 100%, 0 35%);
+    box-shadow: 0 0 20px rgba(255,46,99,.55), 0 0 10px rgba(0,229,255,.3);
+  }
+
+  /* ============ 芯片 / 按钮 ============ */
+  .chip {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    background: rgba(20,26,44,.7);
+    color: var(--text-2);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+  .chip:hover { color: var(--text); border-color: var(--neon-2); background: rgba(0,229,255,.06); }
+  .chip.active {
+    background: linear-gradient(135deg, var(--neon), #d61f4a);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(255,46,99,.4);
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    cursor: pointer;
+    transition: all .15s;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  .btn-ghost {
+    background: rgba(20,26,44,.6);
+    color: var(--text-2);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { color: var(--neon-2); border-color: var(--neon-2); box-shadow: inset 0 0 20px rgba(0,229,255,.1); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--neon), #d61f4a);
+    color: #fff;
+    border: none;
+    box-shadow: 0 0 24px rgba(255,46,99,.5);
+  }
+  .btn-primary:hover { filter: brightness(1.15) saturate(1.1); }
+
+  /* ============ 搜索 ============ */
+  .search-input {
+    background: rgba(15,21,36,.85);
+    border: 1px solid var(--line);
+    color: var(--text);
+    transition: all .15s;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  }
+  .search-input::placeholder { color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+  .search-input:focus {
+    outline: none;
+    border-color: var(--neon-2);
+    box-shadow: 0 0 0 3px rgba(0,229,255,.15), inset 0 0 20px rgba(0,229,255,.05);
+  }
+
+  /* ============ HERO ============ */
+  .hero-title {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 56px);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff 0%, #b8c0dc 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .hero-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(90deg, var(--neon), transparent);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    box-shadow: 0 0 20px rgba(255,46,99,.35);
+  }
+
+  /* 统计小卡 */
+  .stat-tile {
+    background: linear-gradient(135deg, rgba(15,21,36,.9), rgba(10,14,24,.9));
+    border: 1px solid var(--line);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-tile::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    opacity: .8;
+  }
+  .stat-tile::after {
+    content: attr(data-corner);
+    position: absolute; top: 6px; right: 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: .15em;
+  }
+  .stat-num {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--text);
+    text-shadow: 0 0 20px rgba(0,229,255,.15);
+  }
+  .stat-num.hot { color: var(--neon); text-shadow: 0 0 24px rgba(255,46,99,.45); }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-2);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-weight: 600;
+  }
+
+  /* ============ 章节标题 ============ */
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0;
+    margin: 20px 0 16px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .section-header::before {
+    content: "";
+    position: absolute; left: 0; top: 50%;
+    width: 3px; height: 24px;
+    background: linear-gradient(180deg, var(--neon), var(--neon-2));
+    box-shadow: 0 0 10px rgba(255,46,99,.6);
+    transform: translateY(-50%);
+    margin-left: -1px;
+  }
+  .section-title {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding-left: 16px;
+    color: var(--text);
+  }
+  .section-count {
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: .1em;
+  }
+
+  /* ============ 卡片 ============ */
+  .card {
+    position: relative;
+    background: rgba(15,21,36,.75);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    transition: transform .2s ease, border-color .2s;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    /* 提示浏览器这是独立层，滚动时不用整体重绘 */
+    contain: layout paint;
+    will-change: transform;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--neon-2);
+  }
+  /* hover 四角发光效果去掉 - 太耗性能 */
+
+  .card-img {
+    aspect-ratio: 1/1;
+    background: radial-gradient(circle at 50% 40%, rgba(0,229,255,.06), rgba(5,7,12,.9) 70%);
+    display: flex; align-items: center; justify-content: center;
+    cursor: zoom-in;
+    position: relative; overflow: hidden;
+  }
+  /* 卡片图片区扫描线：去掉 - 数量太多影响滚动 */
+  .card-img img {
+    max-width: 92%; max-height: 92%;
+    object-fit: contain;
+    transition: transform .3s ease;
+  }
+  .card:hover .card-img img { transform: scale(1.06); }
+
+  .card-body {
+    padding: 12px 14px 14px;
+    background: linear-gradient(180deg, rgba(15,21,36,.6), rgba(10,14,24,.9));
+    border-top: 1px solid var(--line);
+  }
+
+  /* NEW 徽标（三角切标签） */
+  .badge-new {
+    position: absolute; top: 10px; right: -2px;
+    background: linear-gradient(90deg, var(--neon), var(--neon-2));
+    color: #fff;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .12em;
+    padding: 4px 12px 4px 14px;
+    clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%);
+    z-index: 5;
+    box-shadow: 0 0 16px rgba(255,46,99,.5);
+    animation: neonPulse 2s infinite;
+  }
+  @keyframes neonPulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(255,46,99,.5); }
+    50% { box-shadow: 0 0 24px rgba(255,46,99,.9); }
+  }
+
+  /* 收藏按钮 */
+  .fav-btn {
+    position: absolute; top: 10px; left: 10px; z-index: 5;
+    width: 32px; height: 32px;
+    background: rgba(5,7,12,.85);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px; line-height: 1;
+    transition: transform .15s, border-color .15s, color .15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .fav-btn:hover { transform: scale(1.12); border-color: var(--gold); }
+  .fav-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(255,179,0,.15); box-shadow: 0 0 16px rgba(255,179,0,.4); }
+  .fav-btn:not(.active) { color: var(--text-2); }
+
+  /* 品质徽章 */
+  .rarity-badge {
+    display: inline-block;
+    padding: 2px 10px 2px 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    white-space: nowrap;
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  }
+
+  .card-name {
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: .02em;
+    line-height: 1.2;
+    color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-meta {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: .1em;
+  }
+  .card-meta:hover { color: var(--neon-2); }
+
+  /* ============ 面板 ============ */
+  .panel {
+    background: rgba(15,21,36,.7);
+    border: 1px solid var(--line);
+    padding: 20px;
+    position: relative;
+  }
+  .panel::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--neon-2), var(--neon), transparent);
+    opacity: .7;
+  }
+
+  /* ============ 筛选控制条（常驻） ============ */
+  .filter-bar { padding: 16px 20px; }
+  .filter-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255,255,255,.05);
+  }
+  .filter-row:last-child { border-bottom: none; }
+  .filter-label {
+    flex-shrink: 0;
+    width: 80px;
+    padding-top: 6px;
+    font-size: 10px;
+    letter-spacing: .15em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .filter-chips {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* ============ 抽屉 ============ */
+  .drawer {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 340px;
+    background: linear-gradient(180deg, #0a0e18, #05070c);
+    border-right: 1px solid var(--line);
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    z-index: 50;
+    display: flex; flex-direction: column;
+  }
+  .drawer::after {
+    content: "";
+    position: absolute; top: 0; right: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, var(--neon), transparent 30%, transparent 70%, var(--neon-2));
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(4px);
+    z-index: 45;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+  .drawer-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .drawer-section-title {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .drawer-section-title::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--neon); border-radius: 50%;
+    box-shadow: 0 0 8px var(--neon);
+  }
+
+  /* ============ Lightbox ============ */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(15,21,36,.85), rgba(0,0,0,.98));
+    display: none;
+    z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 40px;
+    cursor: zoom-out;
+    backdrop-filter: blur(12px);
+  }
+  .lightbox.show { display: flex; }
+  .lightbox img {
+    max-width: 92vw; max-height: 84vh;
+    object-fit: contain;
+    filter: drop-shadow(0 30px 80px rgba(0,229,255,.15));
+  }
+  .lightbox-info {
+    position: absolute;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    background: rgba(15,21,36,.9);
+    border: 1px solid var(--line);
+    padding: 10px 22px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    max-width: 80vw;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  }
+  .lightbox-close {
+    position: absolute; top: 24px; right: 30px;
+    color: var(--neon);
+    font-size: 24px; font-weight: 700;
+    cursor: pointer;
+    width: 44px; height: 44px;
+    background: rgba(15,21,36,.9);
+    border: 1px solid var(--neon);
+    display: flex; align-items: center; justify-content: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: all .15s;
+  }
+  .lightbox-close:hover { background: var(--neon); color: #fff; }
+
+  /* 淡入 */
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeSlide .35s ease both; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--neon), var(--neon-2)); }
+</style>
+</head>
+<body>
+
+<!-- ============ 顶栏 ============ -->
+<div class="topbar">
+  <div class="max-w-[1400px] mx-auto px-6 py-3 flex items-center gap-4">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="text-lg">SKIN<span class="text-[color:var(--neon)]">.</span>TRACKER</div>
+    </div>
+
+    <div class="flex-1 max-w-xl mx-auto relative">
+      <input id="search-input" type="text"
+             placeholder=">> SEARCH: NAME / GAME / RARITY"
+             class="search-input w-full px-4 py-2 text-sm mono">
+      <span id="search-count" class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] mono text-[color:var(--neon-2)]"></span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="stats-btn" class="btn btn-ghost">📊 <span class="hidden lg:inline">STATS</span></button>
+      <button id="timeline-btn" class="btn btn-ghost">📅 <span class="hidden lg:inline">TIMELINE</span></button>
+      <button id="export-btn" class="btn btn-primary">📤 EXPORT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 抽屉（已废弃，保留骨架但不使用） ============ -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<aside class="drawer" id="drawer" style="display:none">
+  <div class="drawer-header">
+    <div>[ FILTERS ]</div>
+    <button id="drawer-close" class="btn btn-ghost !p-1.5 !px-2">✕</button>
+  </div>
+</aside>
+
+<!-- ============ 主内容 ============ -->
+<div class="max-w-[1400px] mx-auto px-6 py-10">
+
+  <!-- HERO -->
+  <section class="hero mb-8">
+    <div class="hero-tag mono">// WEEKLY INTEL</div>
+    <h1 class="hero-title mt-4">SKIN<br>INTELLIGENCE</h1>
+    <p class="text-[color:var(--text-2)] mt-3 text-sm mono tracking-wider" id="meta-line"></p>
+
+    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="stat-tile clip-cut" data-corner="01">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">Total Records</div>
+      </div>
+      <div class="stat-tile clip-cut" data-corner="02">
+        <div class="stat-num hot" id="stat-new">—</div>
+        <div class="stat-label">New This Cycle</div>
+      </div>
+      <div class="stat-tile clip-cut" data-corner="03">
+        <div class="stat-num" id="stat-games">—</div>
+        <div class="stat-label">Games Tracked</div>
+      </div>
+      <div class="stat-tile clip-cut" data-corner="04">
+        <div class="stat-num" id="stat-fav">—</div>
+        <div class="stat-label">Favorites</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 筛选控制条（常驻） -->
+  <section class="filter-bar panel clip-cut mb-6">
+    <div class="filter-row">
+      <div class="filter-label mono">// CATEGORY</div>
+      <div class="filter-chips" id="filters"></div>
+    </div>
+    <div class="filter-row" id="rarity-row" style="display:none">
+      <div class="filter-label mono">// RARITY</div>
+      <div class="filter-chips" id="rarity-filters"></div>
+    </div>
+    <div class="filter-row">
+      <div class="filter-label mono">// MODE</div>
+      <div class="flex gap-4 items-center flex-wrap">
+        <label class="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <input type="checkbox" id="only-new" class="accent-[color:var(--neon)]">
+          <span class="mono text-xs tracking-wider">ONLY LATEST</span>
+        </label>
+        <label class="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <input type="checkbox" id="only-fav" class="accent-[color:var(--gold)]">
+          <span class="mono text-xs tracking-wider">★ FAVORITES <span id="fav-count" class="text-[color:var(--text-3)]"></span></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 统计面板 -->
+  <section id="stats-panel" class="hidden panel clip-cut mb-10 fade-in">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <div class="drawer-section-title">Games</div>
+        <div style="height:220px"><canvas id="chart-games"></canvas></div>
+      </div>
+      <div>
+        <div class="drawer-section-title">Category</div>
+        <div style="height:220px"><canvas id="chart-category"></canvas></div>
+      </div>
+      <div>
+        <div class="drawer-section-title">Latest Drops</div>
+        <div style="height:220px"><canvas id="chart-new"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 时间轴 -->
+  <section id="timeline-panel" class="hidden panel clip-cut mb-10 fade-in">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div class="drawer-section-title !mb-0">Release Timeline</div>
+      <div class="text-[10px] mono text-[color:var(--text-3)]">// First-seen based, not actual in-game release</div>
+    </div>
+    <div style="height:340px"><canvas id="chart-timeline"></canvas></div>
+  </section>
+
+  <!-- 内容区 -->
+  <main id="content" class="space-y-4"></main>
+
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+  <span class="lightbox-close">✕</span>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-info" id="lightbox-info"></div>
+</div>
+
+<footer class="text-center mono text-[10px] text-[color:var(--text-3)] py-10 tracking-widest">
+  [ FOR PERSONAL RESEARCH USE ONLY // MADE WITH VIBECODING ]
+</footer>
+
+<script>
+// ============ 状态 ============
+let DATA = null;
+let activeFilter = "全部";
+let activeRarity = "全部";
+let onlyNew = false;
+let onlyFav = false;
+let searchQuery = "";
+
+// 分批渲染：只先画前 N 张，滚动到底部再追加
+const BATCH_SIZE = 200;
+let renderedCount = 0;    // 当前已渲染的卡片总数
+let flatItemsCache = [];  // 当前筛选后所有条目按 section 平铺（含 section 分隔信息）
+
+const FAV_KEY = "skin_tracker_favorites";
+const loadFavs = () => { try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); } catch { return new Set(); } };
+const saveFavs = (s) => localStorage.setItem(FAV_KEY, JSON.stringify([...s]));
+let favSet = loadFavs();
+const favKey = (game, category, name) => `${game}|${category}|${name}`;
+
+// ============ 加载 ============
+async function load() {
+  try {
+    const res = await fetch("data.json?t=" + Date.now());
+    DATA = await res.json();
+    render();
+  } catch (e) {
+    document.getElementById("content").innerHTML =
+      `<div class="text-red-400 p-6 panel">读取 data.json 失败：${e.message}<br>请先运行 <code>run.bat</code>。</div>`;
+  }
+}
+
+// ============ 过滤 ============
+function getFilteredGroups() {
+  const q = searchQuery.trim().toLowerCase();
+  const keys = Object.keys(DATA.groups).sort();
+  const showKeys = activeFilter === "全部" ? keys : [activeFilter];
+  const result = {};
+  for (const key of showKeys) {
+    const [category, game] = key.split("-");
+    let items = DATA.groups[key] || [];
+    if (onlyNew) items = items.filter(it => it.is_new);
+    if (onlyFav) items = items.filter(it => favSet.has(favKey(game, category, it.name)));
+    if (activeFilter !== "全部" && activeRarity !== "全部") {
+      items = items.filter(it => (it.rarity || "未标注") === activeRarity);
+    }
+    if (q) {
+      items = items.filter(it =>
+        it.name.toLowerCase().includes(q) ||
+        key.toLowerCase().includes(q) ||
+        (it.rarity || "").toLowerCase().includes(q)
+      );
+    }
+    if (items.length > 0) result[key] = items;
+  }
+  return result;
+}
+
+// ============ 渲染 ============
+function render() {
+  document.getElementById("meta-line").textContent =
+    `// LAST SYNC : ${DATA.updated_at}`;
+  document.getElementById("stat-total").textContent = DATA.total.toLocaleString();
+  document.getElementById("stat-new").textContent = DATA.new_count.toLocaleString();
+  const gameSet = new Set(Object.keys(DATA.groups).map(k => k.split("-")[1]));
+  document.getElementById("stat-games").textContent = gameSet.size;
+  document.getElementById("stat-fav").textContent = favSet.size;
+  document.getElementById("fav-count").textContent = `(${favSet.size})`;
+
+  const keys = Object.keys(DATA.groups).sort();
+  const filters = ["全部", ...keys];
+  document.getElementById("filters").innerHTML = filters.map(f =>
+    `<button data-f="${f}" class="chip filter-btn ${f === activeFilter ? 'active' : ''}">
+      ${f}${f !== "全部" ? ` · ${DATA.groups[f].length}` : ""}
+    </button>`
+  ).join("");
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.onclick = () => { activeFilter = btn.dataset.f; activeRarity = "全部"; render(); };
+  });
+
+  const rarityRow = document.getElementById("rarity-row");
+  const rarityBox = document.getElementById("rarity-filters");
+  if (activeFilter !== "全部" && DATA.rarities?.[activeFilter]?.length > 0) {
+    const rarities = DATA.rarities[activeFilter];
+    const items = DATA.groups[activeFilter] || [];
+    const countByRarity = {};
+    items.forEach(it => { const r = it.rarity || "未标注"; countByRarity[r] = (countByRarity[r] || 0) + 1; });
+
+    let html = `<button data-r="全部" class="chip rarity-btn ${activeRarity === '全部' ? 'active' : ''}">All · ${items.length}</button>`;
+    for (const r of rarities) {
+      const active = activeRarity === r.name;
+      const cnt = countByRarity[r.name] || 0;
+      const style = active
+        ? `background: ${r.color}; color:#fff; border-color: transparent; box-shadow: 0 0 20px ${r.color}66;`
+        : `border: 1px solid ${r.color}; color: ${r.color}; background: ${r.color}12;`;
+      html += `<button data-r="${r.name}" class="chip rarity-btn" style="${style}">${r.name} · ${cnt}</button>`;
+    }
+    if (countByRarity["未标注"]) {
+      html += `<button data-r="未标注" class="chip rarity-btn ${activeRarity === '未标注' ? 'active' : ''}">未标注 · ${countByRarity["未标注"]}</button>`;
+    }
+    rarityBox.innerHTML = html;
+    rarityRow.style.display = "";
+    rarityBox.querySelectorAll(".rarity-btn").forEach(btn => {
+      btn.onclick = () => { activeRarity = btn.dataset.r; render(); };
+    });
+  } else {
+    rarityRow.style.display = "none";
+  }
+
+  document.getElementById("only-new").onchange = e => { onlyNew = e.target.checked; render(); };
+  document.getElementById("only-new").checked = onlyNew;
+  document.getElementById("only-fav").onchange = e => { onlyFav = e.target.checked; render(); };
+  document.getElementById("only-fav").checked = onlyFav;
+
+  const container = document.getElementById("content");
+  container.innerHTML = "";
+
+  const filtered = getFilteredGroups();
+  const shownKeys = Object.keys(filtered);
+  const totalShown = shownKeys.reduce((s, k) => s + filtered[k].length, 0);
+  document.getElementById("search-count").textContent =
+    searchQuery.trim() ? `${totalShown} HITS` : "";
+
+  if (shownKeys.length === 0) {
+    container.innerHTML = `<div class="text-[color:var(--text-2)] text-center py-20 panel mono">NO DATA MATCH CURRENT FILTER</div>`;
+    return;
+  }
+
+  // 把所有 section+item 平铺成一个大数组，便于分批渲染
+  flatItemsCache = [];
+  for (const key of shownKeys) {
+    const [category, game] = key.split("-");
+    flatItemsCache.push({ type: "section", key, count: filtered[key].length });
+    for (const it of filtered[key]) {
+      flatItemsCache.push({ type: "item", it, game, category });
+    }
+    flatItemsCache.push({ type: "section-end" });
+  }
+  renderedCount = 0;
+  renderMore();
+}
+
+/**
+ * 追加渲染下一批。滚动到底部时会触发。
+ */
+function renderMore() {
+  if (renderedCount >= flatItemsCache.length) return;
+  const container = document.getElementById("content");
+  const frag = document.createDocumentFragment();
+
+  let itemsPushed = 0;
+  let currentSection = null;
+  let currentGrid = null;
+  // 找到当前还没渲染完的 section 位置
+  let i = renderedCount;
+
+  while (i < flatItemsCache.length && itemsPushed < BATCH_SIZE) {
+    const node = flatItemsCache[i];
+    if (node.type === "section") {
+      // 关掉上一个 section
+      if (currentSection) frag.appendChild(currentSection);
+      currentSection = document.createElement("section");
+      currentSection.className = "fade-in";
+      currentSection.innerHTML = `
+        <div class="section-header">
+          <div class="section-title">${node.key}</div>
+          <div class="section-count mono">[ ${node.count.toString().padStart(4, '0')} ]</div>
+        </div>
+      `;
+      currentGrid = document.createElement("div");
+      currentGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      currentSection.appendChild(currentGrid);
+      i++;
+    } else if (node.type === "section-end") {
+      if (currentSection) { frag.appendChild(currentSection); currentSection = null; currentGrid = null; }
+      i++;
+    } else if (node.type === "item") {
+      // 如果这个 batch 起点正好在 item 中间（跨批），要重建 section 头部
+      if (!currentGrid) {
+        // 反查最近的 section 标签
+        let j = i;
+        while (j >= 0 && flatItemsCache[j].type !== "section") j--;
+        if (j >= 0) {
+          const s = flatItemsCache[j];
+          currentSection = document.createElement("section");
+          currentSection.className = "fade-in";
+          currentSection.innerHTML = `<div class="section-header"><div class="section-title">${s.key}</div><div class="section-count mono">[ ${s.count.toString().padStart(4,'0')} ]</div></div>`;
+          currentGrid = document.createElement("div");
+          currentGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+          currentSection.appendChild(currentGrid);
+        }
+      }
+      currentGrid.insertAdjacentHTML("beforeend", renderCard(node.it, node.game, node.category));
+      itemsPushed++;
+      i++;
+    }
+  }
+  if (currentSection) frag.appendChild(currentSection);
+  container.appendChild(frag);
+  renderedCount = i;
+
+  // 绑事件：只对新增的卡绑
+  const allCards = container.querySelectorAll(".card:not([data-bound])");
+  allCards.forEach(card => {
+    card.setAttribute("data-bound", "1");
+    const fav = card.querySelector(".fav-btn");
+    fav.onclick = (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const k = fav.dataset.key;
+      if (favSet.has(k)) favSet.delete(k); else favSet.add(k);
+      saveFavs(favSet);
+      fav.classList.toggle("active");
+      fav.textContent = fav.classList.contains("active") ? "★" : "☆";
+      document.getElementById("fav-count").textContent = `(${favSet.size})`;
+      document.getElementById("stat-fav").textContent = favSet.size;
+    };
+    const imgWrap = card.querySelector(".card-img");
+    imgWrap.onclick = () => openLightbox(imgWrap.dataset.src, imgWrap.dataset.name, imgWrap.dataset.meta);
+  });
+
+  // 更新哨兵位置
+  updateSentinel();
+}
+
+// 用 IntersectionObserver 监听底部哨兵，接近时触发下一批
+let sentinelObserver = null;
+function updateSentinel() {
+  let sentinel = document.getElementById("scroll-sentinel");
+  if (renderedCount >= flatItemsCache.length) {
+    if (sentinel) sentinel.remove();
+    return;
+  }
+  if (!sentinel) {
+    sentinel = document.createElement("div");
+    sentinel.id = "scroll-sentinel";
+    sentinel.style.cssText = "height:1px;";
+    document.getElementById("content").insertAdjacentElement("afterend", sentinel);
+    if (!sentinelObserver) {
+      sentinelObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) renderMore();
+      }, { rootMargin: "1200px 0px" });  // 提前一屏半开始加载
+    }
+    sentinelObserver.observe(sentinel);
+  }
+}
+
+function renderCard(it, game, category) {
+  const k = favKey(game, category, it.name);
+  const isFav = favSet.has(k);
+  const meta = `${category}-${game}${it.rarity ? ' · ' + it.rarity : ''}`;
+  return `
+    <div class="card">
+      <div class="fav-btn ${isFav ? 'active' : ''}" data-key="${k}" title="收藏">${isFav ? '★' : '☆'}</div>
+      ${it.is_new ? '<span class="badge-new">// NEW</span>' : ''}
+      <div class="card-img" data-src="${it.image_url}" data-name="${escapeAttr(it.name)}" data-meta="${escapeAttr(meta)}">
+        ${it.image_url
+          ? `<img src="${it.image_url}" alt="${escapeAttr(it.name)}" loading="lazy" onerror="this.style.display='none'">`
+          : `<span class="text-[color:var(--text-3)] mono text-xs">// NO IMAGE</span>`}
+      </div>
+      <div class="card-body">
+        <div class="card-name" title="${escapeAttr(it.name)}">${it.name}</div>
+        <div class="mt-2 flex items-center justify-between gap-2">
+          <a href="${it.source_url}" target="_blank" class="card-meta">${it.first_seen.slice(0,10)} ↗</a>
+          ${it.rarity
+            ? `<span class="rarity-badge" style="background:${it.rarity_color || '#4b5563'}">${it.rarity}</span>`
+            : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function escapeAttr(s) { return String(s || "").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+
+// ============ Lightbox ============
+function openLightbox(src, name, meta) {
+  if (!src) return;
+  document.getElementById("lightbox-img").src = src;
+  document.getElementById("lightbox-info").textContent = `${name}  //  ${meta}`;
+  document.getElementById("lightbox").classList.add("show");
+}
+function closeLightbox(e) {
+  if (e.target.id === "lightbox-img") return;
+  document.getElementById("lightbox").classList.remove("show");
+}
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") document.getElementById("lightbox").classList.remove("show");
+});
+
+// ============ 搜索 ============
+document.getElementById("search-input").addEventListener("input", e => {
+  searchQuery = e.target.value; render();
+});
+
+// ============ 导出 Excel ============
+document.getElementById("export-btn").addEventListener("click", () => {
+  const filtered = getFilteredGroups();
+  const rows = [];
+  for (const key of Object.keys(filtered)) {
+    const [category, game] = key.split("-");
+    for (const it of filtered[key]) {
+      rows.push({
+        "游戏": game, "分类": category, "皮肤名称": it.name,
+        "品质": it.rarity || "", "是否本次新增": it.is_new ? "是" : "",
+        "是否收藏": favSet.has(favKey(game, category, it.name)) ? "★" : "",
+        "首次发现日期": it.first_seen.slice(0, 10),
+        "图片链接": it.image_url, "来源链接": it.source_url,
+      });
+    }
+  }
+  if (rows.length === 0) { alert("当前筛选下没有数据可导出"); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws["!cols"] = [{ wch: 10 }, { wch: 10 }, { wch: 40 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 60 }, { wch: 60 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "皮肤数据");
+  const stamp = new Date().toISOString().slice(0, 10);
+  const suffix = onlyFav ? "_收藏" : (onlyNew ? "_本次新增" : "");
+  XLSX.writeFile(wb, `皮肤追踪_${stamp}${suffix}.xlsx`);
+});
+
+// ============ Chart.js ============
+const chartInstances = {};
+Chart.defaults.color = "#7a86a8";
+Chart.defaults.borderColor = "rgba(255,255,255,.05)";
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 11;
+
+function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+
+function flatAll() {
+  const out = [];
+  for (const key of Object.keys(DATA.groups)) {
+    const [category, game] = key.split("-");
+    for (const it of DATA.groups[key]) out.push({ ...it, game, category });
+  }
+  return out;
+}
+
+function renderStats() {
+  const all = flatAll();
+  const NEON = "#ff2e63";
+  const CYAN = "#00e5ff";
+
+  const byGame = {};
+  all.forEach(it => byGame[it.game] = (byGame[it.game] || 0) + 1);
+  const games = Object.keys(byGame).sort((a, b) => byGame[b] - byGame[a]);
+  destroyChart("chart-games");
+  chartInstances["chart-games"] = new Chart(document.getElementById("chart-games"), {
+    type: "bar",
+    data: { labels: games, datasets: [{ data: games.map(g => byGame[g]), backgroundColor: NEON, borderRadius: 0 }] },
+    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  const byCat = {};
+  all.forEach(it => byCat[it.category] = (byCat[it.category] || 0) + 1);
+  destroyChart("chart-category");
+  chartInstances["chart-category"] = new Chart(document.getElementById("chart-category"), {
+    type: "doughnut",
+    data: { labels: Object.keys(byCat), datasets: [{ data: Object.values(byCat), backgroundColor: [NEON, CYAN, "#facc15", "#f472b6"], borderColor: "#05070c", borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+  });
+
+  const newByGame = {};
+  all.filter(it => it.is_new).forEach(it => newByGame[it.game] = (newByGame[it.game] || 0) + 1);
+  const newGames = Object.keys(newByGame).sort((a, b) => newByGame[b] - newByGame[a]);
+  const noNew = newGames.length === 0;
+  destroyChart("chart-new");
+  chartInstances["chart-new"] = new Chart(document.getElementById("chart-new"), {
+    type: "bar",
+    data: { labels: noNew ? ["NO DATA"] : newGames, datasets: [{ data: noNew ? [0] : newGames.map(g => newByGame[g]), backgroundColor: CYAN, borderRadius: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+}
+
+function renderTimeline() {
+  const all = flatAll();
+  const monthSet = new Set(); const games = new Set(); const cube = {};
+  all.forEach(it => {
+    const m = (it.first_seen || "").slice(0, 7); if (!m) return;
+    monthSet.add(m); games.add(it.game);
+    cube[it.game] = cube[it.game] || {};
+    cube[it.game][m] = (cube[it.game][m] || 0) + 1;
+  });
+  const months = [...monthSet].sort();
+  const gameList = [...games].sort();
+  const palette = ["#ff2e63", "#00e5ff", "#ffb300", "#a78bfa", "#22c55e", "#f472b6", "#f87171", "#60a5fa"];
+  destroyChart("chart-timeline");
+  chartInstances["chart-timeline"] = new Chart(document.getElementById("chart-timeline"), {
+    type: "line",
+    data: {
+      labels: months,
+      datasets: gameList.map((g, i) => ({
+        label: g, data: months.map(m => (cube[g] && cube[g][m]) || 0),
+        borderColor: palette[i % palette.length],
+        backgroundColor: palette[i % palette.length] + "22",
+        tension: 0.35, fill: false, borderWidth: 2, pointRadius: 3,
+      }))
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+
+document.getElementById("stats-btn").addEventListener("click", () => {
+  const p = document.getElementById("stats-panel");
+  const wasHidden = p.classList.contains("hidden");
+  p.classList.toggle("hidden");
+  if (wasHidden) { renderStats(); p.scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
+document.getElementById("timeline-btn").addEventListener("click", () => {
+  const p = document.getElementById("timeline-panel");
+  const wasHidden = p.classList.contains("hidden");
+  p.classList.toggle("hidden");
+  if (wasHidden) { renderTimeline(); p.scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
+
+load();
+</script>
+</body>
+</html>

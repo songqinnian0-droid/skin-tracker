@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.installed
+
+# 数据库 - 让每个人跑爬虫自己生成
+# 注意：如果要让 GitHub Pages 直接展示数据，data.json 必须保留（在下方例外）
+skins.db
+
+# 日志
+logs/
+
+# 报告（图片较大，通过 Git 传效率低，作品集里放几张精选到 assets/ 目录）
+reports/
+
+# 编辑器/IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 临时文件
+_*.py
+_t.py
+_cleanup.py
+_prep.py
+
+# 虚拟环境
+venv/
+.venv/
+env/
