@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-08-04 11:32:41",
+  "updated_at": "2026-08-05 13:46:13",
   "total": 9451,
-  "new_count": 12,
+  "new_count": 0,
   "groups": {
     "时装皮肤-Apex": [
       {
@@ -4797,7 +4797,7 @@
         "image_url": "https://static.wikia.nocookie.net/apexlegends_gamepedia_en/images/f/f1/Above_The_Law_Maggie.png/revision/latest?cb=20220210050831",
         "source_url": "https://apexlegends.fandom.com/wiki/File:Above_The_Law_Maggie.png",
         "first_seen": "2026-08-04T10:07:48.734501",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Legendary",
         "rarity_color": "#f4a136"
       },
@@ -4806,7 +4806,7 @@
         "image_url": "https://static.wikia.nocookie.net/apexlegends_gamepedia_en/images/9/91/A_Gaze_Eternal_Revenant.png/revision/latest?cb=20210710012528",
         "source_url": "https://apexlegends.fandom.com/wiki/File:A_Gaze_Eternal_Revenant.png",
         "first_seen": "2026-08-04T10:07:48.727881",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Legendary",
         "rarity_color": "#f4a136"
       },
@@ -7290,7 +7290,7 @@
         "image_url": "https://static.wikia.nocookie.net/apexlegends_gamepedia_en/images/a/ac/Absolute_Zero_Horizon.png/revision/latest?cb=20201214161234",
         "source_url": "https://apexlegends.fandom.com/wiki/File:Absolute_Zero_Horizon.png",
         "first_seen": "2026-08-04T10:07:44.561518",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Epic",
         "rarity_color": "#c745ff"
       },
@@ -33709,7 +33709,7 @@
         "image_url": "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIa-2lmxU-LR0dnuNm6E8Vl45Iv181z1fh7lk6nz6XRk-fO8YaVjNP3dDDLHl7kks7U4Gi2xkUoj42XXntypcHyQO1J0DsZzFuAJsBW4kNPlN_SiuVKK_o8s4A",
         "source_url": "https://steamcommunity.com/market/listings/730/%E2%80%9C%E4%B8%A4%E6%AC%A1%E2%80%9D%E9%BA%A6%E8%80%83%E4%BC%8A%20%7C%20%E7%BE%8E%E5%9B%BD%E7%A9%BA%E5%86%9B%E6%88%98%E6%9C%AF%E7%A9%BA%E4%B8%AD%E7%AE%A1%E5%88%B6%E9%83%A8%E9%98%9F",
         "first_seen": "2026-08-03T20:25:20.306222",
-        "is_new": true,
+        "is_new": false,
         "rarity": "非凡",
         "rarity_color": "#d32ce6"
       },
@@ -33790,7 +33790,7 @@
         "image_url": "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIa-2lmxU-LR0dnuNm6E8Vl45Iv181z1fh7lk6nz_DFk-fO8YaVjNPbdXmTGk-hw4rlvGSzjx0tz6jnWwo2odHnDblIjCcZwFu4NsBexkYexMvSiuVIb0S_y2g",
         "source_url": "https://steamcommunity.com/market/listings/730/B%20%E4%B8%AD%E9%98%9F%E6%8C%87%E6%8C%A5%E5%AE%98%20%7C%20%E8%8B%B1%E5%9B%BD%E7%A9%BA%E5%86%9B%E7%89%B9%E5%88%AB%E9%83%A8%E9%98%9F",
         "first_seen": "2026-08-03T20:25:20.238002",
-        "is_new": true,
+        "is_new": false,
         "rarity": "高级",
         "rarity_color": "#4b69ff"
       },
@@ -33799,7 +33799,7 @@
         "image_url": "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIa-2lmxU-LR0dnuNm6E8Vl45Iv181z1fh7lk6nz_DFk-fO8YaVjNPfdWDDDxeokseNoTX-1k0R-smSDz4qqcHieZlUhA5QkRuIMu0KwwdDmYfSiuVJoTILK3g",
         "source_url": "https://steamcommunity.com/market/listings/730/D%20%E4%B8%AD%E9%98%9F%E5%86%9B%E5%AE%98%20%7C%20%E6%96%B0%E8%A5%BF%E5%85%B0%E7%89%B9%E7%A7%8D%E7%A9%BA%E5%8B%A4%E5%9B%A2",
         "first_seen": "2026-08-03T20:25:20.231151",
-        "is_new": true,
+        "is_new": false,
         "rarity": "高级",
         "rarity_color": "#4b69ff"
       }
@@ -34973,7 +34973,7 @@
         "image_url": "https://fortnite-api.com/images/cosmetics/br/cid_a_448_athena_commando_m_pennantseasone_c/icon.png",
         "source_url": "https://fortnite-api.com/images/cosmetics/br/CID_A_448_Athena_Commando_M_PennantSeasOne_C/icon.png",
         "first_seen": "2026-08-03T21:00:05.844747",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Rare",
         "rarity_color": "#3b8fe1"
       },
@@ -49373,7 +49373,7 @@
         "image_url": "https://fortnite-api.com/images/cosmetics/br/character_stagecue_chalk/icon.png",
         "source_url": "https://fortnite-api.com/images/cosmetics/br/Character_StageCue_Chalk/icon.png",
         "first_seen": "2026-08-03T20:59:53.484947",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Epic",
         "rarity_color": "#c745ff"
       },
@@ -56942,7 +56942,7 @@
         "image_url": "https://fortnite-api.com/images/cosmetics/br/character_decasphere/icon.png",
         "source_url": "https://fortnite-api.com/images/cosmetics/br/Character_DecaSphere/icon.png",
         "first_seen": "2026-08-03T20:59:46.737216",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Epic",
         "rarity_color": "#c745ff"
       },
@@ -81509,7 +81509,7 @@
         "image_url": "https://media.valorant-api.com/weaponskins/82204cf0-4a3d-2802-6eb9-9eac53472a3f/displayicon.png",
         "source_url": "https://playvalorant.com/",
         "first_seen": "2026-08-03T20:34:49.012435",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Deluxe",
         "rarity_color": "#009587"
       },
@@ -84065,7 +84065,7 @@
         "image_url": "https://media.valorant-api.com/weaponskins/6f3a2a08-4f32-dbdc-8dca-628a5c840052/displayicon.png",
         "source_url": "https://playvalorant.com/",
         "first_seen": "2026-08-03T20:34:46.986909",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Select",
         "rarity_color": "#5a9fe2"
       },
@@ -84956,7 +84956,7 @@
         "image_url": "https://media.valorant-api.com/weaponskins/cda41b87-4d3a-c17c-5f6d-8990cc9c5efb/displayicon.png",
         "source_url": "https://playvalorant.com/",
         "first_seen": "2026-08-03T20:34:46.297282",
-        "is_new": true,
+        "is_new": false,
         "rarity": "Select",
         "rarity_color": "#5a9fe2"
       },
