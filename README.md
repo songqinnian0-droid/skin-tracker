@@ -40,8 +40,6 @@
 
 ![主界面](docs/screenshot-main.png)
 
-![周报样例](docs/screenshot-report.png)
-
 ## 🛠️ 技术栈
 
 - **爬虫**：Python + requests + BeautifulSoup

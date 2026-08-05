@@ -4,9 +4,8 @@ __pycache__/
 *.pyo
 .installed
 
-# 数据库 - 让每个人跑爬虫自己生成
-# 注意：如果要让 GitHub Pages 直接展示数据，data.json 必须保留（在下方例外）
-skins.db
+# 数据库 - 云端 Actions 需要历史基线，所以要纳入版本控制
+# skins.db 现已推送到 git（体积可控，且是 diff 逻辑的必需品）
 
 # 日志
 logs/
